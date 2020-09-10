@@ -1,0 +1,3 @@
+pimcore_forms:
+    form_field:
+        label_format: 'form.%%name%%'   # Note the double '%' for escaping

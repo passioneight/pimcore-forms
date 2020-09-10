@@ -1,0 +1,16 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    # Event Subscriber
+    Passioneight\Bundle\PimcoreFormsBundle\EventSubscriber\:
+        resource: '../../EventSubscriber'
+
+    # Custom Validators
+    Passioneight\Bundle\PimcoreFormsBundle\Form\Validator\:
+        resource: '../../Form/Validator'
+
+    # Symfony extensions
+    form.resolved_type_factory:
+        class: Passioneight\Bundle\PimcoreFormsBundle\Symfony\Component\Form\ResolvedFormTypeFactory

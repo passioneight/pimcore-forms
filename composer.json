@@ -1,0 +1,23 @@
+{
+  "name": "passioneight/pimcore-forms",
+  "type": "pimcore-bundle",
+  "license": "GPL-3.0",
+  "autoload": {
+    "psr-4": {
+      "Passioneight\\Bundle\\PimcoreFormsBundle\\": "src/"
+    }
+  },
+
+  "require": {
+    "passioneight/php-utilities": "^1",
+    "passioneight/pimcore-google-recaptcha": "^1"
+  },
+
+  "extra": {
+    "pimcore": {
+      "bundles": [
+        "Passioneight\\Bundle\\PimcoreFormsBundle\\PimcoreFormsBundle"
+      ]
+    }
+  }
+}
