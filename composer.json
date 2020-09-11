@@ -9,8 +9,8 @@
   },
 
   "require": {
-    "passioneight/php-utilities": "^1",
-    "passioneight/pimcore-google-recaptcha": "^1"
+    "passioneight/php-utilities": "^1.0",
+    "passioneight/pimcore-google-recaptcha": "^1.0"
   },
 
   "extra": {
