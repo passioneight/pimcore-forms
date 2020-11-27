@@ -3,7 +3,7 @@
 namespace Passioneight\Bundle\PimcoreFormsBundle\Util;
 
 use Passioneight\Bundle\PhpUtilitiesBundle\Constant\Php;
-use Passioneight\Bundle\PhpUtilitiesBundle\Utility\NamespaceUtility;
+use Passioneight\Bundle\PhpUtilitiesBundle\Service\Utility\NamespaceUtility;
 
 class FormUtil
 {
