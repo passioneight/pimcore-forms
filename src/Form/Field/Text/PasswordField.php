@@ -54,7 +54,8 @@ class PasswordField extends FormField
             'constraints' => [
                 new NotBlank(),
                 new Regex([
-                    'pattern' => $this->pattern
+                    'pattern' => $this->getPattern(),
+                    'message' => "form.{$this->getName()}.invalid-pattern"
                 ])
             ]
         ]);
