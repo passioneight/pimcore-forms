@@ -51,13 +51,21 @@ class PasswordField extends FormField
     {
         $defaultOptions = parent::getDefaultOptions();
         return array_merge($defaultOptions, [
-            'constraints' => [
-                new NotBlank(),
-                new Regex([
-                    'pattern' => $this->getPattern(),
-                    'message' => "form.{$this->getName()}.invalid-pattern"
-                ])
-            ]
+            'constraints' => $this->getDefaultConstraints()
         ]);
+    }
+
+    /**
+     * @return array
+     */
+    protected function getDefaultConstraints(): array
+    {
+        return [
+            new NotBlank(),
+            new Regex([
+                'pattern' => $this->getPattern(),
+                'message' => "{$this->getName()}.invalid-pattern"
+            ])
+        ];
     }
 }

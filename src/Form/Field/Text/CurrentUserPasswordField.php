@@ -9,15 +9,12 @@ class CurrentUserPasswordField extends PasswordField
     const NAME = "current-password";
 
     /**
-     * @return array
+     * @inheritdoc
      */
-    public function getDefaultOptions(): array
+    protected function getDefaultConstraints(): array
     {
-        $defaultOptions = parent::getDefaultOptions();
-        return array_merge_recursive($defaultOptions, [
-            'constraints' => [
-                new CurrentUserPasswordConstraint()
-            ]
+        return array_merge(parent::getDefaultConstraints(), [
+            new CurrentUserPasswordConstraint()
         ]);
     }
 }
