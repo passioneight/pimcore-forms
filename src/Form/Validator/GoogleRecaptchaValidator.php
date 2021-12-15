@@ -3,8 +3,8 @@
 namespace Passioneight\Bundle\PimcoreFormsBundle\Form\Validator;
 
 use Passioneight\Bundle\PimcoreFormsBundle\Form\Constraint\GoogleRecaptcha;
-use Passioneight\Bundle\GoogleRecaptchaBundle\Event\ValidationEvent;
-use Passioneight\Bundle\GoogleRecaptchaBundle\Exception\Validation\ValidationException;
+use Passioneight\Bundle\PimcoreGoogleRecaptchaBundle\Event\ValidationEvent;
+use Passioneight\Bundle\PimcoreGoogleRecaptchaBundle\Exception\Validation\ValidationException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
