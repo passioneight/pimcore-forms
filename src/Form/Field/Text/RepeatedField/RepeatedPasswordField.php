@@ -1,31 +1,21 @@
 <?php
 
-namespace Passioneight\Bundle\PimcoreFormsBundle\Form\Field\Text\RepeatedField;
+namespace Passioneight\PimcoreForms\Form\Field\Text\RepeatedField;
 
-use Passioneight\Bundle\PimcoreFormsBundle\Form\Field\RepeatedFormField;
-use Passioneight\Bundle\PimcoreFormsBundle\Form\Field\Text\PasswordField;
+use Passioneight\PimcoreForms\Form\Field\RepeatedFormField;
+use Passioneight\PimcoreForms\Form\Field\Text\PasswordField;
 
 class RepeatedPasswordField extends RepeatedFormField
 {
-    const NAME = PasswordField::NAME;
-
-    /**
-     * EMail constructor.
-     * @param array $options
-     */
-    public function __construct(array $options = [])
+    protected function getType(): string
     {
-        parent::__construct(self::NAME, new PasswordField(), $options);
+        return PasswordField::class;
     }
 
-    /**
-     * @return array
-     */
-    public function getDefaultOptions(): array
+    protected function getOptions(): array
     {
-        $defaultOptions = parent::getDefaultOptions();
-        return array_merge($defaultOptions, [
+        return [
             'invalid_message' => 'form.passwords-do-not-match'
-        ]);
+        ];
     }
 }

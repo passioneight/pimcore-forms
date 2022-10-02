@@ -1,26 +1,22 @@
 <?php
 
-namespace Passioneight\Bundle\PimcoreFormsBundle\Form\Constraint;
+namespace Passioneight\PimcoreForms\Form\Constraint;
 
-use Passioneight\Bundle\PimcoreFormsBundle\Form\Validator\CurrentUserPasswordValidator;
+use Passioneight\PimcoreForms\Form\Validator\CurrentUserPasswordValidator;
 use Symfony\Component\Validator\Constraint;
 
 class CurrentUserPasswordConstraint extends Constraint
 {
-    /** @var string $message */
-    protected $message = "current-user-password.invalid";
+    protected string $message = "form.wrong-password";
 
     /**
      * @inheritDoc
      */
-    public function validatedBy()
+    public function validatedBy(): string
     {
         return CurrentUserPasswordValidator::class;
     }
 
-    /**
-     * @return string
-     */
     public function getMessage(): string
     {
         return $this->message;

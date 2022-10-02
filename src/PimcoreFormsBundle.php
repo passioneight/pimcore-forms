@@ -1,6 +1,6 @@
 <?php
 
-namespace Passioneight\Bundle\PimcoreFormsBundle;
+namespace Passioneight\PimcoreForms;
 
 use Pimcore\Extension\Bundle\AbstractPimcoreBundle;
 

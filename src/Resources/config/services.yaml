@@ -1,0 +1,12 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    # Form Validators
+    Passioneight\PimcoreForms\Form\Validator\:
+        resource: '../../Form/Validator'
+
+    # Form Fields
+    Passioneight\PimcoreForms\Form\Field\:
+        resource: '../../Form/Field'

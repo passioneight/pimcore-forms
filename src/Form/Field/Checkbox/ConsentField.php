@@ -1,37 +1,30 @@
 <?php
 
-namespace Passioneight\Bundle\PimcoreFormsBundle\Form\Field\Checkbox;
+namespace Passioneight\PimcoreForms\Form\Field\Checkbox;
 
-use Passioneight\Bundle\PimcoreFormsBundle\Form\Field\FormField;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\IsTrue;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
-abstract class ConsentField extends FormField
+class ConsentField extends CheckboxType
 {
     /**
-     * Name constructor.
-     * @param string $name
-     * @param array $options
+     * @inheritDoc
      */
-    public function __construct(string $name, array $options = [])
+    public function configureOptions(OptionsResolver $resolver)
     {
-        parent::__construct($name, CheckboxType::class, $options);
-    }
+        parent::configureOptions($resolver);
 
-    /**
-     * @return array
-     */
-    public function getDefaultOptions(): array
-    {
-        $defaultOptions = parent::getDefaultOptions();
-
-        $options = $this->isRequired() ? [
-            'required' => $this->isRequired(),
-            'constraints' => new IsTrue([
+        $resolver->setDefault('required', true);
+        $resolver->setDefault('mapped', false); // see https://github.com/pimcore/pimcore/issues/11584
+        $resolver->setDefault('constraints', [
+            new NotBlank([
+                'message' => 'form.required'
+            ]),
+            new IsTrue([
                 'message' => 'form.consent-required'
             ])
-        ] : [];
-
-        return array_merge($defaultOptions, $options);
+        ]);
     }
 }

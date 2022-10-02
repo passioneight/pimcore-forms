@@ -1,265 +1,132 @@
 # Usage
-Create your forms in `AppBundle\Form`.
 
-For example, you may want to have a registration form for your customers.
-Create a class `AppBundle\Form\RegistrationForm` and extend it from the provided `AbstractForm` class.
+If you built forms with Symfony before, you'll really only need to check out the [proposed conventions](#conventions).
+Otherwise, you'll want to read through Symfony's documentation first.
 
-> As best practice it is considered to have your form classes end in **Form** (e.g., Registration**Form**).
+### Conventions
 
-> Don't forget to register your forms as services. This will especially come in handy when using `DataTransformer`s or
-> `DataMapper`s.
+To keep things concise and clear, the following conventions should be applied in your project:
 
-Now implement the `buildForm` method as usual (see Symfony's documentation for more information). You may use the `addField`
-method of the passed `FormBuilder` instance to add any pre-shipped fields - as explained [here](#building-the-form).
+- create your forms in `App\Form`,
+- have your forms end in `Form` (e.g., `RegistrationForm`),
+- create your form fields in `App\Form\Field`,
+- have your form fields end in `Field` (e.g., `EmailField`),
+- create your form constraints in `App\Form\Constraint`,
+- have your form fields end in `Constraint` (e.g., `PasswordConstraint`),
+- create your form validators in `App\Form\Validator`,
+- have your form fields end in `Validator` (e.g., `CurrentUserPasswordValidator`),
+- always register your forms as services.
 
-> Symfony's `FormBuilder` has been extended to provide a single interface for adding fields. The classic `add` method
-> is still available.
+> This will significantly increase brevity for others. Especially, new developers.
 
-#### Building the Form
-Creating the form classes for a project is a repetitive task, as the form fields tend to be re-configured over and over
-again (for each form). Imagine the client wanting to change a little something in the forms - this will leave you with a
-lot of changes, as it is necessary to update every form that contains the affected form field.
+### Getting Started
 
-To avoid this, [various form fields](/src/Form/Field) are provided.
-These fields aim to get rid of re-configuration, as they provide a single point of change.
-
-> If more fields are required for a project, add them in the `AppBundle\Form\Field` namespace.
-> Also, extend from any of the existing fields - if no existing field is suitable, resort to the abstract `FormField` class.
-
-> Note that there is a `GoogleRecaptcha` field provided, which comes with the corresponding validation. Have a look at
-> our [Google Recaptcha Bundle](https://github.com/passioneight/google-recaptcha) to set things up. The bundle will be installed
-> automatically with this bundle.
-
-You can pass any option that is available according to Symfony's documentation to the corresponding form fields - by passing an `array`
-in the constructor:
-
-```php
-$builder->addField(new EmailField([
-    'attr' => [
-        'class' => 'form-control-lg'
-    ]
-]));
-```
-
-However, when it comes to `RepeatedFormFields` (e.g., `RepeatedPasswordField`), you'll usually want
-to set options on the underlying `FormField` (e.g., `PasswordField`) instead. To do so, you need to pass the options in certain
-ways:
-
-- `["options" => [...]]`, which will apply options to **both** fields.
-- `["first_options" => [...]]`, which will apply options to **first** field only.
-- `["second_options" => [...]]`, which will apply options to **second** field only.
-
-> This is simply the way Symfony handles repeated fields.
-
-###### Example
+First, let's see how a form can be built. For the sake of a relatable example, we'll focus on a registration form.
 
 ```php
 <?php
 
-namespace AppBundle\Form;
+namespace App\Form;
 
-use Passioneight\Bundle\PimcoreFormsBundle\Form\AbstractForm;
-use Passioneight\Bundle\PimcoreFormsBundle\Form\Field\Button\SubmitButton;
-use Passioneight\Bundle\PimcoreFormsBundle\Form\Field\Checkbox\AccountConsentField;
-use Passioneight\Bundle\PimcoreFormsBundle\Form\Field\Text\EmailField;
-use Passioneight\Bundle\PimcoreFormsBundle\Form\Field\Text\RepeatedField\RepeatedPasswordField;
+use Passioneight\PimcoreForms\Form\Field\Checkbox\ConsentField;
+use Passioneight\PimcoreForms\Form\Field\Text\EmailField;
+use Passioneight\PimcoreForms\Form\Field\Text\RepeatedField\RepeatedPasswordField;
+use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class RegistrationForm extends AbstractForm
+class RegistrationForm extends AbstractType
 {
-    const OPTION_TERMS_AND_CONDITIONS_HREF = "terms-and-conditions-href";
+    const OPTION_TAC_HREF = 'tac-href';
+    
+    const FIELD_EMAIL = 'email';
+    const FIELD_PASSWORD = 'password';
+    const FIELD_ACCOUNT_CONSENT = 'account_consent';
 
     /**
      * @inheritDoc
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->addField(new EmailField());
-
-        $builder->addField(new RepeatedPasswordField());
-
-        $builder->addField(new AccountConsentField([
-            'label_translation_parameters' => [
-                '{{ href }}' => $options[self::OPTION_TERMS_AND_CONDITIONS_HREF],
-                '{{ href-class }}' => 'text-primary-hover'
-            ],
-        ]));
-
-        $builder->addField(new SubmitButton([
-            'label_format' => 'form.registration.%name%', // You'll usually want to explicitly set this option for buttons
-            'attr' => [
-                'class' => 'btn btn-primary'
-            ]
-        ]));
+        $builder
+            ->add(self::FIELD_EMAIL, EmailField::class)
+            ->add(self::FIELD_PASSWORD, RepeatedPasswordField::class)
+            ->add(self::FIELD_ACCOUNT_CONSENT, ConsentField::class, [
+                'label_translation_parameters' => [
+                    '{{ href }}' => $options[self::OPTION_TAC_HREF],
+                    '{{ href-class }}' => 'text-primary-hover'
+                ],
+            ])
+            ->add('submit', SubmitType::class, [
+                'label_format' => 'form.registration.submit'
+            ]);
     }
 
     /**
-     * @param OptionsResolver $resolver
+     * @inheritDoc
      */
     public function configureOptions(OptionsResolver $resolver)
     {
         parent::configureOptions($resolver);
-        $this->allowOption($resolver, self::OPTION_TERMS_AND_CONDITIONS_HREF, "#");
+        $resolver->setRequired(self::OPTION_TAC_HREF);
     }
 }
 ```
 
-> Missing the `addField` method in your IDE's auto-completion? Try adding the `@inheritDoc` annotation to the `buildForm` method.
+The `RegistrationForm` will have a _single_ email field, a _repeated_ password field, a checkbox for the user to agree
+to the terms and conditions of your service, and a submit button.
 
-Afterwards, you can update your controller's action to inject Symfony's `FormFactoryInterface`. For example, add the following
-code in an `AuthController`:
+> Note that the `SubmitType` is provided by Symfony itself. So, you can still use Symfony's types as you would usually.
 
-```php
-use AppBundle\Form\RegistrationForm;
-use Symfony\Component\Form\FormFactoryInterface;
-use Symfony\Component\Routing\Annotation\Route;
+The form will also require the developer to pass a URL for the terms and conditions when building the form.
 
-/**
- * Class AuthController
- * @Route("/{_locale}") 
- */
-class AuthController {
-    /**
-     * @Route("/registration") 
-     * @param FormFactoryInterface $formFactory
-     */
-    public function registrationAction(FormFactoryInterface $formFactory)
-    {
-        $registrationForm = $formFactory->create(RegistrationForm::class);
-        $this->view->registrationForm = $registrationForm->createView();
-    }
-}
-```
-
-> Note that it is considered best practice to name your view variable like your form-class - the only difference is that the variable
-> should be `lcfirst`. For example, the variable for the `RegistrationForm` class should be named `registrationForm`.
-
-That's about the most basic version, which allows you to build the form. Rendering the form, however, is up to you - if
-you need more information, please, refer to Symfony's documentation. If you don't need to use entities, you may [go to the
-form-submission handling](#handling-the-form-submission) right away.
-
-#### Using Entities
-Usually, you'll want to use an entity to automatically map any fields to your class. You can do this by passing a second
-parameter to the `create` method: `$formFactory->create(RegistrationForm::class, $entity);`. Additionally, you can pass some 
-options as third parameter to your form, like so `$formFactory->create(RegistrationForm::class, $entity, $options);`.
-
-Here's an example:
+Since the form is now implemented, it is ready to be used. For this, we'll have to create a controller with an action,
+which will handle the form's submission.
 
 ```php
-use AppBundle\Form\RegistrationForm;
-use Pimcore\DataObject\Customer;
+use App\Form\RegistrationForm;
 use Pimcore\Controller\FrontendController;
-use Symfony\Component\Form\FormFactoryInterface;
-use Symfony\Component\Routing\Annotation\Route;
-
-/**
- * Class AuthController
- * @Route("/{_locale}") 
- */
-class AuthController extends FrontendController {
-    /**
-     * @Route("/registration") 
-     * @param FormFactoryInterface $formFactory
-     */
-    public function registrationAction(FormFactoryInterface $formFactory)
-    {
-        $options = [
-            RegistrationForm::OPTION_TERMS_AND_CONDITIONS_HREF => "/some/url/to/the/TACs"
-        ];
-
-        $registrationForm = $formFactory->create(RegistrationForm::class, new Customer(), $options);
-        $this->view->registrationForm = $registrationForm->createView();
-    }
-}
-```
-
-> Note that you can use the `AllowOptionsTrait` in your forms and call the `allowOption` method of the trait in the
-> `configureOptions` method of the form class - this will allow you to add custom options to your form or custom types.
-> The `AbstractForm` class, however, already implements this trait - so, if you extend from this class, there is no need
-> to `use` the trait explicitly in your form class.
-
-#### Handling the Form-Submission
-Handling the form is pretty much described in Symfony's documentation. Here's an example, for the sake of completeness:
-
-```php
-use AppBundle\Form\RegistrationForm;
 use Pimcore\DataObject\Customer;
-use Pimcore\Controller\FrontendController;
-use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
-/**
- * Class AuthController
- * @Route("/{_locale}") 
- */
-class AuthController extends FrontendController {
-    /**
-     * @Route("/registration") 
-     * @param FormFactoryInterface $formFactory
-     */
-    public function registrationAction(Request $request, FormFactoryInterface $formFactory)
+ #[Route("/{_locale}")]
+class AuthenticationController extends FrontendController
+{
+    #[Route("/{registration}")]
+    public function registrationAction(Request $request)
     {
         $options = [
-            RegistrationForm::OPTION_TERMS_AND_CONDITIONS_HREF => "/some/url/to/the/TACs"
+            RegistrationForm::OPTION_TAC_HREF => "/some/url/to/the/TACs"
         ];
 
-        $registrationForm = $formFactory
-            ->create(RegistrationForm::class, new Customer(), $options)
+        $registrationForm = $this
+            ->createForm(RegistrationForm::class, new Customer(), $options)
             ->handleRequest($request);
 
-        if ($registrationForm->isSubmitted())
-        {
-            if($registrationForm->isValid())
-            {
+        if ($registrationForm->isSubmitted()) {
+            if($registrationForm->isValid()) {
                 /** @var Customer $customer */
                 $customer = $registrationForm->getData();
-                // Handle new customer
+                // Omitted for brevity: handling the account consent
+                
+                $customer->save(['versionNote' => 'Customer registered']);
+                
+                // Omitted for brevity: sending confirmation mail(s)
             }
         }
 
-        $this->view->registrationForm = $registrationForm->createView();
+        return $this->renderTemplate('authentication/registration.html.twig', [
+            'registration_form' => $registrationForm->createView()
+        ]);
     }
 }
 ```
 
-The `getData` method will either return an `array` with the submitted data or an instance of the entity you passed to `$formFactory->create`,
-with the data already available to be retrieved with the corresponding getters of the instantiated class.
+The `getData` method will return the submitted data, mapped to the fields. If mapping was disabled for a field (i.e., 
+`'mapped' => false`), the field has to be handled explicitly because the data is _not_ available in the `getData` method.
 
-> If you are using entities, chances are that your form has fields that are not mapped (i.e. `"mapped" => false`). To access the
-> submitted values, you can use the form itself: `$value = $form->get(<MyFormField>::NAME)->getData();`.
-
-#### Using Multiple Forms on One Page
-Imagine a website which has both a login- and a registration-form on the same page. You'll want to create **two** classes
-for each form, as it eases the form submission handling.
-
-Assuming the classes `RegistrationForm` and `LoginForm` exist and are properly configured, the controller would now
-call the `$formFactory->create` method twice - once per form:
-
-```php
-$options = [
-    RegistrationForm::OPTION_TERMS_AND_CONDITIONS_HREF => "/some/url/to/the/TACs"
-];
-
-$registrationForm = $formFactory
-    ->create(RegistrationForm::class, new Customer(), $options)
-    ->handleRequest($request);
-
-$loginForm = $formFactory
-    ->create(LoginForm::class, new Customer(), $options)
-    ->handleRequest($request);
-
-// Check if form was submitted and is valid
-
-$this->view->registrationForm = $registrationForm->createView();
-$this->view->loginForm = $loginForm->createView();
-```
-
-That's it. You can now render both forms on the same page.
-
-> Note that you might want to increase performance by calling `->handleRequest($request)` only when necessary. That is,
-> if the `RegistrationForm` was not _submitted_ then call `->handleRequest($request)` for the `LoginForm`. Yet, you'll need to
-> create both forms, if you want to render them at the same time.
+> The most common use case for this is any kind of consent.
 
 ### [Go to overview](/README.md)

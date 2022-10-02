@@ -1,95 +1,68 @@
 <?php
 
-namespace Passioneight\Bundle\PimcoreFormsBundle\Form\Field\File;
+namespace Passioneight\PimcoreForms\Form\Field\File;
 
-use Passioneight\Bundle\PimcoreFormsBundle\Form\Field\FormField;
-use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
-class FileField extends FormField
+class FileField extends AbstractType
 {
-    const NAME = "file";
+    const OPTION_MAX_SIZE = "maxSize";
+    const OPTION_ALLOWED_MIME_TYPES = "allowedMimeTypes";
 
-    /** @var array|string[] $allowedMimeTypes */
-    private $allowedMimeTypes;
-
-    /** @var mixed|null $maxSize */
-    private $maxSize;
-
-    /**
-     * EMail constructor.
-     * @param array $options
-     */
-    public function __construct(array $options = [])
+    public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        parent::__construct(self::NAME, FileType::class, $options);
-        $this->setMaxSize(null);
+        parent::buildForm($builder, $options);
+        $this->addFileConstraints($builder);
     }
 
-    /**
-     * @return array|string[] all allowed mime types
-     */
-    public function getAllowedMimeTypes()
+    protected function addFileConstraints(FormBuilderInterface $builder): self
     {
-        return $this->allowedMimeTypes;
-    }
+        $constraints = $builder->getOption('constraints') ?? [];
 
-    /**
-     * @param array $allowedMimeTypes
-     * @return $this
-     */
-    public function setAllowedMimeTypes(array $allowedMimeTypes)
-    {
-        $this->allowedMimeTypes = $allowedMimeTypes;
-        return $this;
-    }
+        foreach ($constraints as $constraint) {
+            if ($constraint instanceof File) {
+                $constraint->maxSize = $builder->getOption(self::OPTION_MAX_SIZE);
+                $constraint->mimeTypes = $builder->getOption(self::OPTION_ALLOWED_MIME_TYPES);
+            }
+        }
 
-    /**
-     * @return mixed|null
-     */
-    public function getMaxSize()
-    {
-        return $this->maxSize;
-    }
-
-    /**
-     * @param mixed $maxSize
-     * @return $this
-     */
-    public function setMaxSize($maxSize)
-    {
-        $this->maxSize = $maxSize;
         return $this;
     }
 
     /**
      * @inheritDoc
      */
-    public function getDefaultOptions(): array
+    public function configureOptions(OptionsResolver $resolver)
     {
-        $defaultOptions = parent::getDefaultOptions();
-        return array_merge($defaultOptions, [
-            'constraints' => [
-                new NotBlank(),
-                new File([
-                    'maxSize' => $this->getMaxSize(),
-                    'mimeTypes' => $this->getAllowedMimeTypes(),
-                    'mimeTypesMessage' => self::NAME . '.unsupported-mime-type',
-                    'disallowEmptyMessage' => self::NAME . '.empty-file',
-                    'maxSizeMessage' => self::NAME . '.max-size-exceeded',
-                    'notFoundMessage' => self::NAME . '.not-found',
-                    'notReadableMessage' => self::NAME . '.not-readable',
-                    'uploadCantWriteErrorMessage' => self::NAME . '.cannot-write-temp-file',
-                    'uploadErrorMessage' => self::NAME . '.failed-with-unknown-reason',
-                    'uploadExtensionErrorMessage' => self::NAME . '.failed-due-to-php-extension',
-                    'uploadFormSizeErrorMessage' => self::NAME . '.max-size-of-html-form-exceeded',
-                    'uploadIniSizeErrorMessage' => self::NAME . '.max-size-of-php-ini-size-exceeded',
-                    'uploadNoFileErrorMessage' => self::NAME . '.no-file-uploaded',
-                    'uploadNoTmpDirErrorMessage' => self::NAME . '.no-php-ini-upload-tmp-dir-defined',
-                    'uploadPartialErrorMessage' => self::NAME . '.partially-uploaded-only',
-                ])
-            ]
+        parent::configureOptions($resolver);
+
+        $resolver->setDefault(self::OPTION_MAX_SIZE, null);
+        $resolver->setDefault(self::OPTION_ALLOWED_MIME_TYPES, null);
+        $resolver->setRequired(self::OPTION_ALLOWED_MIME_TYPES);
+
+        $resolver->setDefault('constraints', [
+            new NotBlank([
+                'message' => 'form.required'
+            ]),
+            new File([
+                'mimeTypesMessage' => 'form.unsupported-mime-type',
+                'disallowEmptyMessage' => 'form.empty-file',
+                'maxSizeMessage' => 'form.max-size-exceeded',
+                'notFoundMessage' => 'form.not-found',
+                'notReadableMessage' => 'form.not-readable',
+                'uploadCantWriteErrorMessage' => 'form.cannot-write-temp-file',
+                'uploadErrorMessage' => 'form.failed-with-unknown-reason',
+                'uploadExtensionErrorMessage' => 'form.failed-due-to-php-extension',
+                'uploadFormSizeErrorMessage' => 'form.max-size-of-html-form-exceeded',
+                'uploadIniSizeErrorMessage' => 'form.max-size-of-php-ini-size-exceeded',
+                'uploadNoFileErrorMessage' => 'form.no-file-uploaded',
+                'uploadNoTmpDirErrorMessage' => 'form.no-php-ini-upload-tmp-dir-defined',
+                'uploadPartialErrorMessage' => 'form.partially-uploaded-only',
+            ])
         ]);
     }
 }

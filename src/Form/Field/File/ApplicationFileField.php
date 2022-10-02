@@ -1,18 +1,19 @@
 <?php
 
-namespace Passioneight\Bundle\PimcoreFormsBundle\Form\Field\File;
+namespace Passioneight\PimcoreForms\Form\Field\File;
+
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class ApplicationFileField extends FileField
 {
-    const NAME = "application";
-
     /**
      * @inheritDoc
      */
-    public function __construct(array $options = [])
+    public function configureOptions(OptionsResolver $resolver)
     {
-        parent::__construct($options);
-        $this->setName(self::NAME);
-        $this->setAllowedMimeTypes(['application/*']);
+        parent::configureOptions($resolver);
+        $resolver->setDefault(self::OPTION_ALLOWED_MIME_TYPES, [
+            'application/*'
+        ]);
     }
 }
