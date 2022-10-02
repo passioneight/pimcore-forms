@@ -1,46 +1,57 @@
 <?php
 
-namespace Passioneight\Bundle\PimcoreFormsBundle\Form\Validator;
+namespace Passioneight\PimcoreForms\Form\Validator;
 
-use Passioneight\Bundle\PimcoreFormsBundle\Form\Constraint\CurrentUserPasswordConstraint;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Passioneight\PimcoreForms\Form\Constraint\CurrentUserPasswordConstraint;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Core\Security;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
+use Symfony\Contracts\Service\Attribute\Required;
 
 class CurrentUserPasswordValidator extends ConstraintValidator
 {
-    /** @var UserPasswordEncoderInterface $userPasswordEncoder */
-    private $userPasswordEncoder;
-
-    /** @var Security $security */
-    private $security;
+    private Security $security;
+    private UserPasswordHasherInterface $userPasswordHasher;
 
     /**
-     * CurrentUserPasswordValidator constructor.
-     * @param Security $security
-     * @param UserPasswordEncoderInterface $userPasswordEncoder
+     * @inheritDoc
      */
-    public function __construct(Security $security, UserPasswordEncoderInterface $userPasswordEncoder)
-    {
-        $this->security = $security;
-        $this->userPasswordEncoder = $userPasswordEncoder;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function validate($password, Constraint $constraint)
+    public function validate($value, Constraint $constraint)
     {
         if (!$constraint instanceof CurrentUserPasswordConstraint) {
             throw new UnexpectedTypeException($constraint, CurrentUserPasswordConstraint::class);
         }
 
-        if (!$this->userPasswordEncoder->isPasswordValid($this->security->getUser(), $password)) {
+        $user = $this->security->getUser();
+        if (!$user instanceof PasswordAuthenticatedUserInterface) {
+            throw new \LogicException("User '$user' needs to implement '" . PasswordAuthenticatedUserInterface::class . "'");
+        }
+
+        if (!$this->userPasswordHasher->isPasswordValid($user, $value)) {
             $this->context
                 ->buildViolation($constraint->getMessage())
                 ->addViolation();
         }
+    }
+
+    /**
+     * @internal
+     */
+    #[Required]
+    public function setSecurity(Security $security)
+    {
+        $this->security = $security;
+    }
+
+    /**
+     * @internal
+     */
+    #[Required]
+    public function setUserPasswordHasher(UserPasswordHasherInterface $userPasswordHasher)
+    {
+        $this->userPasswordHasher = $userPasswordHasher;
     }
 }

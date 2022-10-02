@@ -1,19 +1,14 @@
 <?php
 
-namespace Passioneight\Bundle\PimcoreFormsBundle\Form\Field\Text;
+namespace Passioneight\PimcoreForms\Form\Field\Text;
 
-use Passioneight\Bundle\PimcoreFormsBundle\Form\Constraint\CurrentUserPasswordConstraint;
+use Passioneight\PimcoreForms\Form\Constraint\CurrentUserPasswordConstraint;
 
 class CurrentUserPasswordField extends PasswordField
 {
-    const NAME = "current-password";
-
-    /**
-     * @inheritdoc
-     */
-    protected function getDefaultConstraints(): array
+    protected function getConstraints(): array
     {
-        return array_merge(parent::getDefaultConstraints(), [
+        return array_merge(parent::getConstraints(), [
             new CurrentUserPasswordConstraint()
         ]);
     }

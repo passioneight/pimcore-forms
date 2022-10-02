@@ -1,56 +1,24 @@
 <?php
 
-namespace Passioneight\Bundle\PimcoreFormsBundle\Form\Field;
+namespace Passioneight\PimcoreForms\Form\Field;
 
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
-abstract class RepeatedFormField extends FormField
+abstract class RepeatedFormField extends RepeatedType
 {
-    const REPEATED_FIELD_NAME_SUFFIX = "-repeated";
-
-    /** @var FormField $formField */
-    protected $formField;
-
     /**
-     * RepeatedField constructor.
-     * @param string $name
-     * @param FormField $formField
-     * @param array $options
+     * @inheritDoc
      */
-    public function __construct(string $name, FormField $formField, array $options = [])
+    public function configureOptions(OptionsResolver $resolver)
     {
-        parent::__construct($name, RepeatedType::class, $options);
-        $this->setIsRequired($formField->isRequired());
-        $this->formField = $formField;
+        parent::configureOptions($resolver);
+
+        $resolver->setDefault('type', $this->getType());
+        $resolver->setDefault('options', $this->getOptions());
     }
 
-    /**
-     * @return FormField
-     */
-    public function getFormField(): FormField
-    {
-        return $this->formField;
-    }
+    abstract protected function getType(): string;
 
-    /**
-     * @return string
-     */
-    public function getRepeatedFieldName()
-    {
-        return $this->formField->getName() . self::REPEATED_FIELD_NAME_SUFFIX;
-    }
-
-    /**
-     * @return array
-     */
-    public function getDefaultOptions(): array
-    {
-        $defaultOptions = parent::getDefaultOptions();
-        return array_merge($defaultOptions, [
-            'type' => $this->formField->getType(),
-            'first_name' => $this->formField->getName(),
-            'second_name' => $this->getRepeatedFieldName(),
-            'options' => $this->formField->getOptions()
-        ]);
-    }
+    abstract protected function getOptions(): array;
 }

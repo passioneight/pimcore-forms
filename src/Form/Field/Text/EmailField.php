@@ -1,37 +1,28 @@
 <?php
 
-namespace Passioneight\Bundle\PimcoreFormsBundle\Form\Field\Text;
+namespace Passioneight\PimcoreForms\Form\Field\Text;
 
-use Passioneight\Bundle\PimcoreFormsBundle\Form\Field\FormField;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Email;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
-class EmailField extends FormField
+class EmailField extends EmailType
 {
-    const NAME = "email";
-
     /**
-     * EMail constructor.
-     * @param array $options
+     * @inheritDoc
      */
-    public function __construct(array $options = [])
+    public function configureOptions(OptionsResolver $resolver)
     {
-        parent::__construct(self::NAME, EmailType::class, $options);
-        $this->setIsRequired(true);
-    }
+        parent::configureOptions($resolver);
 
-    /**
-     * @return array
-     */
-    public function getDefaultOptions(): array
-    {
-        $defaultOptions = parent::getDefaultOptions();
-        return array_merge($defaultOptions, [
-            'constraints' => [
-                new NotBlank(),
-                new Email()
-            ]
+        $resolver->setDefault('constraints', [
+            new NotBlank([
+                'message' => 'form.required'
+            ]),
+            new Email([
+                'message' => 'form.invalid-email-address'
+            ])
         ]);
     }
 }
